@@ -1,11 +1,11 @@
 import { User } from "../domain/User";
 import { UserRepository } from "../domain/UserRepository";
 
-export class UserCreate {
+export class UserGetOne {
   constructor(private readonly repository: UserRepository) {}
 
-  async insert(user: User): Promise<User> {
-    const userInserted = await this.repository.save(user);
-    return userInserted;
+  async getOne(id: string): Promise<User | null> {
+    const userFound = await this.repository.getOne(id);
+    return userFound;
   }
 }

@@ -8,6 +8,7 @@ export class Address {
 export type GENDER = "Hombre" | "Mujer" | "Otro";
 
 export class User {
+  id: string;
   name: string;
   lastname: string;
   email: string;
@@ -17,6 +18,7 @@ export class User {
   gender: GENDER;
 
   constructor(
+    id: string,
     name: string,
     lastname: string,
     email: string,
@@ -48,6 +50,7 @@ export class User {
     address.city = city;
     address.country = country;
 
+    this.id = id;
     this.name = name;
     this.lastname = lastname;
     this.email = email;
