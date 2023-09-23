@@ -1,45 +1,36 @@
-import { UserCreate } from "./app/modules/user/application/UserCreate";
-import { User } from "./app/modules/user/domain/User";
-import { UserRepository } from "./app/modules/user/domain/UserRepository";
-import { UserInfrastructure } from "./app/modules/user/infrastructure/UserInfrastructure";
+import express, { Application } from "express";
 
-/*async function start() {
-  const user = new User(
-    "Juan",
-    "Perez",
-    "juan.perez@email.com",
-    "12345",
-    34,
-    "calle azul",
-    345,
-    "LIma",
-    "Perú",
-    "Hombre"
-  );
-  const repository: UserRepository = new UserInfrastructure();
-  const app = new UserCreate(repository);
-  console.log(await app.insert(user));
-}*/
+import userRouter from "./app/modules/user/presentation/user.routes";
 
-(async () => {
-  const user = new User(
-    "7f2d459d-1bc0-41cf-9aff-f9f8f2926dd9",
-    "Juan",
-    "Perez",
-    "juan2.perez@email.com",
-    "12345",
-    34,
-    "calle azul",
-    345,
-    "LIma",
-    "Perú",
-    "Hombre"
-  );
-  const repository: UserRepository = new UserInfrastructure();
-  const app = new UserCreate(repository);
-  console.log(await app.insert(user));
+class App {
+  application: Application;
 
-  /*const repository: UserRepository = new UserInfrastructure();
-  const app = new UserGetOne(repository);
-  console.log(await app.getOne("ef208023-049f-43a9-b497-719ac608878a"));*/
-})();
+  constructor() {
+    this.application = express();
+    this.mountRoutes();
+  }
+
+  mountRoutes() {
+    this.application.use("/user", userRouter);
+
+    /*this.application.post("/", (req: Request, res: Response) => {
+      res
+        .type("text/html; charset=utf8")
+        .send("<h1>Hola mundo</h1><strong>Inicio de comunicación</strong>");
+    });
+
+    this.application.get("/product", (req: Request, res: Response) => {
+      const products = [{ name: "product 1" }, { name: "product 2" }];
+
+      res.type("application/json; charset=utf8").json(products);
+    });
+
+    this.application.get("/sales", (req: Request, res: Response) => {
+      const sales = [{ name: "sale 1" }, { name: "sale 2" }];
+
+      res.type("application/json; charset=utf8").json(sales);
+    });*/
+  }
+}
+
+export default new App().application;
