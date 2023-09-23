@@ -15,7 +15,22 @@ class UserRoutes {
   mountRoutes() {
     // get(path: string, fn: (req: Request, res: Response):void))
 
-    this.router.get("/all", this.userController.list);
+    this.router.get("/", this.userController.list.bind(this.userController));
+    this.router.get(
+      "/:id",
+      this.userController.getOne.bind(this.userController)
+    );
+    this.router.post("/", this.userController.insert.bind(this.userController));
+
+    /*
+    
+    class ExpressGet {
+      get(path: string, fn: Function) {
+        fn(req, res)
+      }
+    }
+
+    */
 
     this.router.post("/", (req: Request, res: Response) => {
       this.userController.insert(req, res);

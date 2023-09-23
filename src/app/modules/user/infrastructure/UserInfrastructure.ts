@@ -1,6 +1,6 @@
-import { User } from '../domain/User';
-import { UserRepository } from '../domain/UserRepository';
-import { UserMemory } from './UserMemory';
+import { User } from "../domain/User";
+import { UserRepository } from "../domain/UserRepository";
+import { UserMemory } from "./UserMemory";
 
 export class UserInfrastructure implements UserRepository {
   constructor() {}
@@ -15,7 +15,13 @@ export class UserInfrastructure implements UserRepository {
   }
 
   getByEmail(email: string): Promise<boolean> {
-    const userFound = UserMemory.users.find((user: User) => user.email === email)
+    const userFound = UserMemory.users.find(
+      (user: User) => user.email === email
+    );
     return userFound ? Promise.resolve(true) : Promise.resolve(false);
+  }
+
+  getAll(): Promise<User[]> {
+    return Promise.resolve(UserMemory.users);
   }
 }
