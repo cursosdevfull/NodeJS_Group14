@@ -1,3 +1,5 @@
+import { validate } from "uuid";
+
 export class Address {
   street: string;
   number: number;
@@ -30,6 +32,8 @@ export class User {
     country: string,
     gender: GENDER
   ) {
+    if (!validate(id)) throw new Error("El id no es válido");
+
     if (name.length < 3)
       throw new Error("El nombre debe tener al menos 3 caracteres");
     if (lastname.length < 3)
