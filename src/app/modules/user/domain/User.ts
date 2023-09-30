@@ -1,4 +1,8 @@
-import { validate } from "uuid";
+import { AgeVO } from "./value-objects/age.vo";
+import { EmailVO } from "./value-objects/email.vo";
+import { IdVO } from "./value-objects/id.vo";
+import { LastnameVO } from "./value-objects/lastname.vo";
+import { NameVO } from "./value-objects/name.vo";
 
 export class Address {
   street: string;
@@ -9,58 +13,107 @@ export class Address {
 
 export type GENDER = "Hombre" | "Mujer" | "Otro";
 
-export class User {
+export interface UserEssentials {
   id: string;
   name: string;
   lastname: string;
   email: string;
   password: string;
+}
+
+export interface UserOptionals {
   age: number;
-  address: Address;
+  street: string;
+  number: number;
+  city: string;
+  country: string;
   gender: GENDER;
+}
 
-  constructor(
-    id: string,
-    name: string,
-    lastname: string,
-    email: string,
-    password: string,
-    age: number,
-    street: string,
-    number: number,
-    city: string,
-    country: string,
-    gender: GENDER
-  ) {
-    if (!validate(id)) throw new Error("El id no es válido");
+/*export interface UserUpdate {
+  name: string;
+  lastname: string;
+  password: string;
+  age: number;
+  street: string;
+  number: number;
+  city: string;
+  country: string;
+  gender: GENDER
+}*/
 
-    if (name.length < 3)
-      throw new Error("El nombre debe tener al menos 3 caracteres");
-    if (lastname.length < 3)
-      throw new Error("El apellido debe tener al menos 3 caracteres");
-    if (email.length < 3)
-      throw new Error("El email debe tener al menos 3 caracteres");
+export type UserUpdate = Partial<
+  Pick<UserEssentials, "name" | "lastname" | "password"> & UserOptionals
+>;
 
-    if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
-      throw new Error("El email no es válido");
+export type UserProperties = UserEssentials & Partial<UserOptionals>;
+
+export class User {
+  private readonly id: string;
+  private name: string;
+  private lastname: string;
+  private readonly email: string;
+  private password: string;
+  private age: number;
+  private address: Address;
+  private gender: GENDER;
+
+  constructor(props: UserProperties) {
+    console.log("Props", props);
+    IdVO.create(props.id);
+    NameVO.create(props.name);
+    LastnameVO.create(props.lastname);
+    EmailVO.create(props.email);
+    AgeVO.create(props.age);
+
+    if (props.age && props.age < 18) {
+      console.log("props.age", props.age);
+      throw new Error("Debes ser mayor de edad");
     }
+    if (props.age && props.age > 140) throw new Error("Edad no válida");
 
-    if (age < 18) throw new Error("Debes ser mayor de edad");
-    if (age > 140) throw new Error("Edad no válida");
+    Object.assign(this, props);
 
     const address = new Address();
-    address.street = street;
-    address.number = number;
-    address.city = city;
-    address.country = country;
 
-    this.id = id;
-    this.name = name;
-    this.lastname = lastname;
-    this.email = email;
-    this.password = password;
-    this.age = age;
+    if (props.street && props.number && props.city && props.country) {
+      address.street = props.street;
+      address.number = props.number;
+      address.city = props.city;
+      address.country = props.country;
+    }
+    /*    address.street = street ?? ""; // street || "";
+    address.number = number ?? 0;
+    address.city = city ?? "";
+    address.country = country ?? "";*/
+
+    this.id = props.id;
+    this.name = props.name;
+    this.lastname = props.lastname;
+    this.email = props.email;
+    this.password = props.password;
+    if (props.age) this.age = props.age;
     this.address = address;
-    this.gender = gender;
+    if (props.gender) {
+      this.gender = props.gender;
+    }
+  }
+
+  properties() {
+    return {
+      id: this.id,
+      name: this.name,
+      lastname: this.lastname,
+      email: this.email,
+      password: this.password,
+      age: this.age,
+      address: this.address,
+      gender: this.gender,
+    };
+  }
+
+  update(userToUpdate: UserUpdate) {
+    NameVO.create(userToUpdate.name);
+    LastnameVO.create(userToUpdate.lastname);
   }
 }

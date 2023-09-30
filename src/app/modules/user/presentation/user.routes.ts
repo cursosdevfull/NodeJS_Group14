@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 
 import { UserController } from "./user.controller";
 
@@ -20,7 +20,7 @@ class UserRoutes {
       "/:id",
       this.userController.getOne.bind(this.userController)
     );
-    this.router.post("/", this.userController.insert.bind(this.userController));
+    this.router.post("/", this.userController.insert.bind(this.userController)); // apply, call
 
     /*
     
@@ -32,9 +32,10 @@ class UserRoutes {
 
     */
 
-    this.router.post("/", (req: Request, res: Response) => {
+    /*this.router.post("/", (req: Request, res: Response) => {
+      console.log("Route /user POST");
       this.userController.insert(req, res);
-    });
+    });*/
   }
 }
 

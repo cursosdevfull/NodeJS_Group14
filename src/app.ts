@@ -13,7 +13,9 @@ class App {
 
   middlewares() {
     this.application.use(express.json());
-    this.application.use(express.urlencoded({ extended: true }));
+    this.application.use(
+      express.urlencoded({ extended: true, limit: "500mb" })
+    );
   }
 
   mountRoutes() {

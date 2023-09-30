@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
 
+import { EncryptService } from "../application/services/Encrypt.service";
 import { UserCreate } from "../application/UserCreate";
 import { UserGetAll } from "../application/UserGetAll";
 import { UserGetOne } from "../application/UserGetOne";
 import { User } from "../domain/User";
 import { UserRepository } from "../domain/UserRepository";
+import { NameVO } from "../domain/value-objects/name.vo";
 import { UserInfrastructure } from "../infrastructure/UserInfrastructure";
 
 export class UserController {
@@ -18,6 +21,8 @@ export class UserController {
     this.userGetOne = new UserGetOne(userRepository);
     this.userGetAll = new UserGetAll(userRepository);
 
+    //console.log(tratamientoPersona("hombre"));
+
     //this.list = this.list.bind(this);
   }
 
@@ -27,36 +32,41 @@ export class UserController {
   }
 
   async insert(req: Request, res: Response) {
-    const {
-      name,
-      lastname,
-      email,
-      password,
-      age,
-      street,
-      number,
-      city,
-      country,
-      gender,
-    } = req.body;
+    console.log("Method insert executed");
+    const { name, lastname, email, password } = req.body;
 
-    const user = new User(
-      "7f2d459d-1bc0-41cf-9aff-f9f8f2926dd9",
-      name,
+    const nameResult = NameVO.create(name);
+    if (nameResult.isErr()) {
+      console.log("Error: ", nameResult.error.message);
+      return res.status(411).json({
+        message: nameResult.error.message,
+        stack: nameResult.error.stack,
+      });
+    }
+
+    const user = new User({
+      id: uuidv4(),
+      name: nameResult.value.getValue(),
       lastname,
       email,
-      password,
-      age,
+      password: await EncryptService.encrypt(password),
+      /*age,
       street,
       number,
       city,
       country,
-      gender
-    );
+      gender,*/
+    });
 
     const userInserted = await this.userCreate.insert(user);
+    if (userInserted.isErr()) {
+      return res.status(500).json({
+        message: userInserted.error.message,
+        stack: userInserted.error.stack,
+      });
+    }
 
-    res.json(userInserted);
+    res.json(userInserted.value);
   }
 
   async getOne(req: Request, res: Response) {
