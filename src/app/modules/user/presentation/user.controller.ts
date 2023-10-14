@@ -3,36 +3,36 @@ import { v4 as uuidv4 } from "uuid";
 
 import { EncryptService } from "../application/services/Encrypt.service";
 import { UserCreate } from "../application/UserCreate";
+import { UserDelete } from "../application/UserDelete";
 import { UserGetAll } from "../application/UserGetAll";
+import { UserGetByPage } from "../application/UserGetByPage";
 import { UserGetOne } from "../application/UserGetOne";
+import { UserUpdate } from "../application/UserUpdate";
 import { User } from "../domain/User";
-import { UserRepository } from "../domain/UserRepository";
 import { NameVO } from "../domain/value-objects/name.vo";
-import { UserInfrastructure } from "../infrastructure/UserInfrastructure";
 
 export class UserController {
-  private readonly userCreate: UserCreate;
-  private readonly userGetOne: UserGetOne;
-  private readonly userGetAll: UserGetAll;
-
-  constructor() {
-    const userRepository: UserRepository = new UserInfrastructure();
-    this.userCreate = new UserCreate(userRepository);
-    this.userGetOne = new UserGetOne(userRepository);
-    this.userGetAll = new UserGetAll(userRepository);
-
-    //console.log(tratamientoPersona("hombre"));
-
-    //this.list = this.list.bind(this);
-  }
+  constructor(
+    private readonly userCreate: UserCreate,
+    private readonly userGetOne: UserGetOne,
+    private readonly userGetAll: UserGetAll,
+    private readonly userUpdate: UserUpdate,
+    private readonly userGetByPage: UserGetByPage,
+    private readonly userDelete: UserDelete
+  ) {}
 
   async list(req: Request, res: Response) {
-    const users = await this.userGetAll.execute();
-    res.json(users);
+    const usersResult = await this.userGetAll.execute();
+    if (usersResult.isErr()) {
+      return res.status(500).json({
+        message: usersResult.error.message,
+        stack: usersResult.error.stack,
+      });
+    }
+    res.json(usersResult.value);
   }
 
   async insert(req: Request, res: Response) {
-    console.log("Method insert executed");
     const { name, lastname, email, password } = req.body;
 
     const nameResult = NameVO.create(name);
@@ -50,15 +50,9 @@ export class UserController {
       lastname,
       email,
       password: await EncryptService.encrypt(password),
-      /*age,
-      street,
-      number,
-      city,
-      country,
-      gender,*/
     });
 
-    const userInserted = await this.userCreate.insert(user);
+    const userInserted = await this.userCreate.execute(user);
     if (userInserted.isErr()) {
       return res.status(500).json({
         message: userInserted.error.message,
@@ -72,5 +66,68 @@ export class UserController {
   async getOne(req: Request, res: Response) {
     const user = await this.userGetOne.getOne(req.params.id);
     res.json(user);
+  }
+
+  async getUsersByPage(req: Request, res: Response) {
+    const { page, pageSize } = req.params;
+    const usersResult = await this.userGetByPage.execute(
+      parseInt(page),
+      parseInt(pageSize)
+    );
+    if (usersResult.isErr()) {
+      return res.status(500).json({
+        message: usersResult.error.message,
+        stack: usersResult.error.stack,
+      });
+    }
+    res.json(usersResult.value);
+  }
+
+  async update(req: Request, res: Response) {
+    const userResult = await this.userGetOne.getOne(req.params.id);
+
+    if (userResult.isErr()) {
+      return res.status(500).json({
+        message: userResult.error.message,
+        stack: userResult.error.stack,
+      });
+    }
+
+    const user = userResult.value;
+    user.update(req.body);
+
+    const userUpdateResult = await this.userUpdate.execute(user);
+    if (userUpdateResult.isErr()) {
+      return res.status(500).json({
+        message: userUpdateResult.error.message,
+        stack: userUpdateResult.error.stack,
+      });
+    }
+
+    res.json(userUpdateResult.value);
+  }
+
+  async delete(req: Request, res: Response) {
+    const userResult = await this.userGetOne.getOne(req.params.id);
+
+    if (userResult.isErr()) {
+      return res.status(500).json({
+        message: userResult.error.message,
+        stack: userResult.error.stack,
+      });
+    }
+
+    const user = userResult.value;
+    user.delete();
+
+    const userDeleteResult = await this.userDelete.execute(userResult.value);
+    if (userDeleteResult.isErr()) {
+      return res.status(500).json({
+        message: userDeleteResult.error.message,
+        stack: userDeleteResult.error.stack,
+      });
+    }
+
+    res.json(userDeleteResult.value);
   }
 }

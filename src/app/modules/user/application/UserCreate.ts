@@ -9,19 +9,26 @@ import { ExceptionApplicationMessage } from "./exceptions/exception";
 export class UserCreate {
   constructor(private readonly repository: UserRepository) {}
 
-  async insert(user: User): Promise<Result<User, Error>> {
-    const userExists = await this.repository.getByEmail(
+  async execute(user: User): Promise<Result<User, Error>> {
+    const userExistsResult = await this.repository.existsUserWithEmail(
       user.properties().email
     );
+    if (userExistsResult.isErr()) {
+      return err(new Error(userExistsResult.error.message));
+    }
+
+    const userExists = userExistsResult.value;
 
     if (userExists) {
       return err(new Error(ExceptionApplicationMessage.USER_ALREADY_EXISTS));
     }
 
-    //user.email = "sergio@correo.com";
-    //user.password = bcrypt.hashSync(user.password, 10);
+    const userInsertedResult = await this.repository.save(user);
+    if (userInsertedResult.isErr()) {
+      return err(new Error(userInsertedResult.error.message));
+    }
 
-    const userInserted = await this.repository.save(user);
-    return ok(userInserted);
+    const userInserted = userInsertedResult.value;
+    return Promise.resolve(ok(userInserted));
   }
 }

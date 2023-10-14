@@ -1,0 +1,36 @@
+### list users
+GET  http://localhost:3000/user HTTP/1.1
+
+### create user
+POST  http://localhost:3000/user HTTP/1.1
+content-type: application/json
+
+{
+    "name":"sergio", 
+    "lastname": "hidalgo",
+    "email":"correo2@correo.com",
+    "password": "12345", 
+    "age": 30, 
+    "number": 825, 
+    "city": "Lima", 
+    "country": "Perú", 
+    "gender": "Hombre"
+}
+
+### get user
+GET http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1
+
+### update user
+PUT http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1
+content-type: application/json
+
+{
+    "name": "sergio iván",
+    "lastname": "hidalgo cáceres"
+}
+
+### users by page
+GET http://localhost:3000/user/page/1/pageSize/20 HTTP/1.1
+
+### delete user
+DELETE http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1

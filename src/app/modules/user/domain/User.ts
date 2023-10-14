@@ -57,9 +57,11 @@ export class User {
   private age: number;
   private address: Address;
   private gender: GENDER;
+  private readonly createdAt: Date;
+  private updatedAt: Date | null;
+  private deletedAt: Date | null;
 
   constructor(props: UserProperties) {
-    console.log("Props", props);
     IdVO.create(props.id);
     NameVO.create(props.name);
     LastnameVO.create(props.lastname);
@@ -73,6 +75,7 @@ export class User {
     if (props.age && props.age > 140) throw new Error("Edad no válida");
 
     Object.assign(this, props);
+    this.createdAt = new Date();
 
     const address = new Address();
 
@@ -82,10 +85,6 @@ export class User {
       address.city = props.city;
       address.country = props.country;
     }
-    /*    address.street = street ?? ""; // street || "";
-    address.number = number ?? 0;
-    address.city = city ?? "";
-    address.country = country ?? "";*/
 
     this.id = props.id;
     this.name = props.name;
@@ -109,11 +108,21 @@ export class User {
       age: this.age,
       address: this.address,
       gender: this.gender,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      deletedAt: this.deletedAt,
     };
   }
 
   update(userToUpdate: UserUpdate) {
     NameVO.create(userToUpdate.name);
     LastnameVO.create(userToUpdate.lastname);
+
+    Object.assign(this, userToUpdate);
+    this.updatedAt = new Date();
+  }
+
+  delete() {
+    this.deletedAt = new Date();
   }
 }

@@ -1,42 +1,50 @@
 import { Router } from "express";
 
+import { UserCreate } from "../application/UserCreate";
+import { UserDelete } from "../application/UserDelete";
+import { UserGetAll } from "../application/UserGetAll";
+import { UserGetByPage } from "../application/UserGetByPage";
+import { UserGetOne } from "../application/UserGetOne";
+import { UserUpdate } from "../application/UserUpdate";
+import { UserRepository } from "../domain/UserRepository";
+import { UserInfrastructure } from "../infrastructure/UserInfrastructure";
 import { UserController } from "./user.controller";
 
 class UserRoutes {
   readonly router: Router;
-  private readonly userController: UserController;
 
-  constructor() {
-    this.userController = new UserController();
+  constructor(private readonly controller: UserController) {
     this.router = Router();
     this.mountRoutes();
   }
 
   mountRoutes() {
-    // get(path: string, fn: (req: Request, res: Response):void))
-
-    this.router.get("/", this.userController.list.bind(this.userController));
+    this.router.get("/", this.controller.list.bind(this.controller));
+    this.router.get("/:id", this.controller.getOne.bind(this.controller));
+    this.router.post("/", this.controller.insert.bind(this.controller)); // apply, call
     this.router.get(
-      "/:id",
-      this.userController.getOne.bind(this.userController)
+      "/page/:page/pageSize/:pageSize",
+      this.controller.getUsersByPage.bind(this.controller)
     );
-    this.router.post("/", this.userController.insert.bind(this.userController)); // apply, call
-
-    /*
-    
-    class ExpressGet {
-      get(path: string, fn: Function) {
-        fn(req, res)
-      }
-    }
-
-    */
-
-    /*this.router.post("/", (req: Request, res: Response) => {
-      console.log("Route /user POST");
-      this.userController.insert(req, res);
-    });*/
+    this.router.put("/:id", this.controller.update.bind(this.controller));
+    this.router.delete("/:id", this.controller.delete.bind(this.controller));
   }
 }
 
-export default new UserRoutes().router;
+const userRepository: UserRepository = new UserInfrastructure();
+const userCreate = new UserCreate(userRepository);
+const userGetOne = new UserGetOne(userRepository);
+const userGetAll = new UserGetAll(userRepository);
+const userUpdate = new UserUpdate(userRepository);
+const userGetByPage = new UserGetByPage(userRepository);
+const userDelete = new UserDelete(userRepository);
+const userController = new UserController(
+  userCreate,
+  userGetOne,
+  userGetAll,
+  userUpdate,
+  userGetByPage,
+  userDelete
+);
+
+export default new UserRoutes(userController).router;

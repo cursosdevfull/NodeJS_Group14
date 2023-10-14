@@ -1,3 +1,0 @@
-curl -X POST  http://localhost:3000/user 
--H 'Content-Type: application/json'
--d '{"name":"sergio", "lastname": "hidalgo","email":"correo2@correo.com","password": "12345", "age": 30, "number": 825, "city": "Lima", "country": "Perú", "gender": "Hombre"}'
