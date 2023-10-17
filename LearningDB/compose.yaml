@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  mysql-db:
+    image: mysql:8
+    container_name: mysql-db
+    ports:
+      - "8200:3306"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_USER: shidalgo
+      MYSQL_PASSWORD: 12345
+      MYSQL_DATABASE: course
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - mysql-network
+
+networks:
+  mysql-network:
+    driver: bridge
