@@ -1,7 +1,7 @@
 import { PageResult } from "@/app/core/domain/page-result.interface";
 import { Result } from "neverthrow";
 
-import { User } from "./User";
+import { User } from "../roots/User";
 
 export interface UserRepository {
   save(user: User): Promise<Result<User, Error>>;

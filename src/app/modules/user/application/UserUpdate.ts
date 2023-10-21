@@ -1,7 +1,7 @@
 import { err, ok, Result } from "neverthrow";
 
-import { User } from "../domain/User";
-import { UserRepository } from "../domain/UserRepository";
+import { UserRepository } from "../domain/repositories/UserRepository";
+import { User } from "../domain/roots/User";
 
 //const pdfMake = require("pdfmake/build/pdfmake");
 

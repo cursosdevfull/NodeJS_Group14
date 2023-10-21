@@ -6,7 +6,7 @@ import { UserGetAll } from "../application/UserGetAll";
 import { UserGetByPage } from "../application/UserGetByPage";
 import { UserGetOne } from "../application/UserGetOne";
 import { UserUpdate } from "../application/UserUpdate";
-import { UserRepository } from "../domain/UserRepository";
+import { UserRepository } from "../domain/repositories/UserRepository";
 import { UserInfrastructure } from "../infrastructure/UserInfrastructure";
 import { UserController } from "./user.controller";
 

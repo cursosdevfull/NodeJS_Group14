@@ -2,8 +2,8 @@ import { PageResult } from "@/app/core/domain/page-result.interface";
 import { IError } from "@/app/core/error/error.interface";
 import { err, ok, Result } from "neverthrow";
 
-import { User } from "../domain/User";
-import { UserRepository } from "../domain/UserRepository";
+import { UserRepository } from "../domain/repositories/UserRepository";
+import { User } from "../domain/roots/User";
 import { UserMemory } from "./UserMemory";
 
 export class UserInfrastructure implements UserRepository {

@@ -1,8 +1,8 @@
-import { AgeVO } from "./value-objects/age.vo";
-import { EmailVO } from "./value-objects/email.vo";
-import { IdVO } from "./value-objects/id.vo";
-import { LastnameVO } from "./value-objects/lastname.vo";
-import { NameVO } from "./value-objects/name.vo";
+import { AgeVO } from "../value-objects/age.vo";
+import { EmailVO } from "../value-objects/email.vo";
+import { IdVO } from "../value-objects/id.vo";
+import { LastnameVO } from "../value-objects/lastname.vo";
+import { NameVO } from "../value-objects/name.vo";
 
 export class Address {
   street: string;

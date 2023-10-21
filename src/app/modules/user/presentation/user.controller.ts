@@ -8,7 +8,7 @@ import { UserGetAll } from "../application/UserGetAll";
 import { UserGetByPage } from "../application/UserGetByPage";
 import { UserGetOne } from "../application/UserGetOne";
 import { UserUpdate } from "../application/UserUpdate";
-import { User } from "../domain/User";
+import { User } from "../domain/roots/User";
 import { NameVO } from "../domain/value-objects/name.vo";
 
 export class UserController {

@@ -1,4 +1,4 @@
-import { User } from "../domain/User";
+import { User } from "../domain/roots/User";
 
 export class UserMemory {
   private static users: User[] = [

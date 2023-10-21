@@ -1,4 +1,4 @@
-import { User } from "../../domain/User";
+import { User } from "../../domain/roots/User";
 import { UserData } from "../../domain/UserData";
 
 export class UserDto {
