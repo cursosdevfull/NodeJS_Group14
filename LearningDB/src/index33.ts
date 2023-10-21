@@ -1,0 +1,13 @@
+import { AppDataSource } from "./datasource";
+
+AppDataSource.initialize()
+  .then(async () => {
+    const manager = AppDataSource.manager;
+
+    // where age>=25 and (name='Jimena' or lastname='Sotelo')
+
+    const medics = await manager.query("call getMedicsByAge(?)", [25]);
+
+    console.log(medics[0]);
+  })
+  .catch(console.log);

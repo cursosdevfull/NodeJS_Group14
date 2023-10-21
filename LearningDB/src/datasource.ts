@@ -1,6 +1,8 @@
 import { DataSource } from "typeorm";
 
 import { MedicEntity } from "./entities/medic";
+import { Order } from "./entities/order";
+import { OrderDetail } from "./entities/order-detail";
 import { SpecialtyEntity } from "./entities/specialty";
 
 interface IDataSource {
@@ -27,5 +29,5 @@ const connection: IDataSource = {
 
 export const AppDataSource = new DataSource({
   ...connection,
-  entities: [MedicEntity, SpecialtyEntity],
+  entities: [MedicEntity, SpecialtyEntity, Order, OrderDetail],
 });

@@ -1,8 +1,8 @@
 import {
   Column,
   Entity,
-  JoinColumn,
-  OneToOne,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 
@@ -11,38 +11,48 @@ import { SpecialtyEntity } from "./specialty";
 @Entity({ name: "medic" })
 export class MedicEntity {
   @PrimaryGeneratedColumn()
-  private id: number;
+  readonly id: number;
 
   @Column({ type: "varchar", length: 100, nullable: false })
-  private name: string;
+  readonly name: string;
 
   @Column({ type: "varchar", length: 100, nullable: false })
-  private lastname: string;
+  readonly lastname: string;
 
   @Column({ type: "int", nullable: false })
-  private age: number;
+  readonly age: number;
 
   @Column({ type: "varchar", length: 100, unique: true })
-  private cmp: string;
+  readonly cmp: string;
 
   @Column({ type: "varchar", length: 100, nullable: false })
-  private gender: string;
+  readonly gender: string;
 
-  @OneToOne(() => SpecialtyEntity, (specialty) => specialty.medic)
-  @JoinColumn()
-  specialty: SpecialtyEntity;
+  //@OneToOne(() => SpecialtyEntity, (specialty) => specialty.medic)
+  //@JoinColumn()
+  /*@OneToMany(() => SpecialtyEntity, (specialty) => specialty.medic, {
+    cascade: true,
+  })*/
+  @ManyToMany(() => SpecialtyEntity, (specialty) => specialty.medics, {
+    cascade: true,
+    eager: true,
+  })
+  @JoinTable()
+  specialties: SpecialtyEntity[];
 
   constructor(
     name: string,
     lastname: string,
     age: number,
     cmp: string,
-    gender: string
+    gender: string,
+    specialties: SpecialtyEntity[]
   ) {
     this.name = name;
     this.lastname = lastname;
     this.age = age;
     this.cmp = cmp;
     this.gender = gender;
+    this.specialties = specialties;
   }
 }

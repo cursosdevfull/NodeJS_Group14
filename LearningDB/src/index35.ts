@@ -8,23 +8,25 @@ AppDataSource.initialize()
     const manager = queryRunner.manager;
 
     try {
-      const orderInserted = await manager
+      const specialtyInserted = await manager
         .createQueryBuilder()
-        .from("order", "order")
+        .from("specialty", "specialty")
         .insert()
-        .values({ date: new Date() })
+        .values({ name: "Cardiología Geriátrica" })
         .execute();
 
-      const orderId = orderInserted.identifiers[0].id;
-
-      const orderDetailInserted = await manager
+      const medicInserted = await manager
         .createQueryBuilder()
-        .from("order_detail", "order_detail")
+        .from("medic", "medic")
         .insert()
-        .values([
-          { quantity: 10, productId: 1, order: orderId },
-          { quantity: 50, productId: null, order: orderId },
-        ])
+        .values({
+          name: "Carlos",
+          lastname: "Olmos",
+          age: 40,
+          gender: "M",
+          cmp: "01234567",
+          specialty: specialtyInserted.identifiers[0].id,
+        })
         .execute();
 
       await queryRunner.commitTransaction();

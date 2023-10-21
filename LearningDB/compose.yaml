@@ -21,6 +21,26 @@ services:
     networks:
       - mysql-network
 
+  mysql-client:
+    image: phpmyadmin
+    container_name: mysql-client
+    environment:
+      PMA_HOST: mysql-service
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - "8000:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+    networks:
+      - mysql-network
+
 networks:
   mysql-network:
+    name: mysql-network
     driver: bridge
