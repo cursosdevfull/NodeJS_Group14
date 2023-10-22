@@ -1,3 +1,5 @@
+import { DataSource } from "typeorm";
+
 export interface IBootstrap {
-  initilize(): Promise<boolean>;
+  initialize(): Promise<boolean | DataSource>;
 }

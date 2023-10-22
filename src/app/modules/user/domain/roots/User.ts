@@ -1,15 +1,9 @@
+import { Address } from "../entities/Address";
 import { AgeVO } from "../value-objects/age.vo";
 import { EmailVO } from "../value-objects/email.vo";
 import { IdVO } from "../value-objects/id.vo";
 import { LastnameVO } from "../value-objects/lastname.vo";
 import { NameVO } from "../value-objects/name.vo";
-
-export class Address {
-  street: string;
-  number: number;
-  city: string;
-  country: string;
-}
 
 export type GENDER = "Hombre" | "Mujer" | "Otro";
 
@@ -29,18 +23,6 @@ export interface UserOptionals {
   country: string;
   gender: GENDER;
 }
-
-/*export interface UserUpdate {
-  name: string;
-  lastname: string;
-  password: string;
-  age: number;
-  street: string;
-  number: number;
-  city: string;
-  country: string;
-  gender: GENDER
-}*/
 
 export type UserUpdate = Partial<
   Pick<UserEssentials, "name" | "lastname" | "password"> & UserOptionals
