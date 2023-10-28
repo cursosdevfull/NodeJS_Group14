@@ -5,7 +5,7 @@ export class AgeVO extends BaseVO<number> {
     super(age);
   }
 
-  static create(age: number | undefined): AgeVO {
+  static create(age: number | undefined | null): AgeVO {
     if (age && (age < 19 || age > 140))
       throw new Error("La edad debe estar entre 19 y 140 años");
 

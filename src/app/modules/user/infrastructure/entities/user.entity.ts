@@ -1,4 +1,7 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
+
+import { RoleEntity } from "../../../role/infrastructure/entities/role.entity";
+import { Address } from "../../domain/entities/Address";
 
 @Entity({ name: "user" })
 export class UserEntity {
@@ -17,14 +20,17 @@ export class UserEntity {
   @Column({ type: "varchar", length: 100 })
   password: string;
 
-  @Column({ type: "int" })
+  @Column({ type: "int", nullable: true })
   age: number;
 
-  @Column({ type: "json" })
-  address: string;
+  @Column({ type: "json", nullable: true })
+  address: Address;
 
-  @Column({ type: "varchar", length: 10 })
+  @Column({ type: "varchar", length: 10, nullable: true })
   gender: string;
+
+  @Column({ type: "varchar", length: 200, nullable: true })
+  image: string;
 
   @Column({ type: "timestamp" })
   createdAt: Date;
@@ -34,4 +40,8 @@ export class UserEntity {
 
   @Column({ type: "timestamp", nullable: true })
   deletedAt: Date;
+
+  @ManyToMany(() => RoleEntity, (role) => role.users)
+  @JoinTable()
+  roles: RoleEntity[];
 }

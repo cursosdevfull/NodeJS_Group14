@@ -1,9 +1,11 @@
 import { Address } from "../entities/Address";
+import { Role } from "../entities/Role";
 import { AgeVO } from "../value-objects/age.vo";
 import { EmailVO } from "../value-objects/email.vo";
 import { IdVO } from "../value-objects/id.vo";
 import { LastnameVO } from "../value-objects/lastname.vo";
 import { NameVO } from "../value-objects/name.vo";
+import { RoleVO } from "../value-objects/role.vo";
 
 export type GENDER = "Hombre" | "Mujer" | "Otro";
 
@@ -13,15 +15,17 @@ export interface UserEssentials {
   lastname: string;
   email: string;
   password: string;
+  roles: Role[];
 }
 
 export interface UserOptionals {
-  age: number;
-  street: string;
-  number: number;
-  city: string;
-  country: string;
-  gender: GENDER;
+  age: number | null;
+  address: Address | null;
+  gender: GENDER | null;
+  createdAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+  image: string | null;
 }
 
 export type UserUpdate = Partial<
@@ -39,6 +43,8 @@ export class User {
   private age: number;
   private address: Address;
   private gender: GENDER;
+  private roles: Role[];
+  private image: string;
   private readonly createdAt: Date;
   private updatedAt: Date | null;
   private deletedAt: Date | null;
@@ -49,35 +55,10 @@ export class User {
     LastnameVO.create(props.lastname);
     EmailVO.create(props.email);
     AgeVO.create(props.age);
-
-    if (props.age && props.age < 18) {
-      console.log("props.age", props.age);
-      throw new Error("Debes ser mayor de edad");
-    }
-    if (props.age && props.age > 140) throw new Error("Edad no válida");
+    RoleVO.create<Role>(props.roles);
 
     Object.assign(this, props);
     this.createdAt = new Date();
-
-    const address = new Address();
-
-    if (props.street && props.number && props.city && props.country) {
-      address.street = props.street;
-      address.number = props.number;
-      address.city = props.city;
-      address.country = props.country;
-    }
-
-    this.id = props.id;
-    this.name = props.name;
-    this.lastname = props.lastname;
-    this.email = props.email;
-    this.password = props.password;
-    if (props.age) this.age = props.age;
-    this.address = address;
-    if (props.gender) {
-      this.gender = props.gender;
-    }
   }
 
   properties() {
@@ -93,12 +74,14 @@ export class User {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       deletedAt: this.deletedAt,
+      roles: this.roles,
+      image: this.image,
     };
   }
 
   update(userToUpdate: UserUpdate) {
-    NameVO.create(userToUpdate.name);
-    LastnameVO.create(userToUpdate.lastname);
+    if (userToUpdate.name) NameVO.create(userToUpdate.name);
+    if (userToUpdate.lastname) LastnameVO.create(userToUpdate.lastname);
 
     Object.assign(this, userToUpdate);
     this.updatedAt = new Date();

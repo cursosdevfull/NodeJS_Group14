@@ -1,0 +1,50 @@
+services:
+  mysql-server:
+    image: mysql:8
+    container_name: mysql-server
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "12345"
+      MYSQL_DATABASE: db_nodejs14
+      MYSQL_USER: user
+      MYSQL_PASSWORD: "12345"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - net-mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_interval: 5s
+
+  mysql-client:
+    image: phpmyadmin
+    container_name: mysql-client
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql-server
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - "8020:80"
+    networks:
+      - net-mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_interval: 5s
+
+volumes:
+  mysql-data:
+    name: mysql-data
+    driver: local
+networks:
+  net-mysql:
+    name: net-mysql
+    driver: bridge

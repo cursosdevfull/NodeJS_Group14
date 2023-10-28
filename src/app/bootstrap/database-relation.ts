@@ -20,8 +20,6 @@ export class DatabaseRelation implements IBootstrap {
       maxQueryExecutionTime: Parameter.maxQueryExecutionTime,
     };
 
-    console.log("dbConfig", dbConfig);
-
     const AppDataSource = new DataSource({
       type: "mysql",
       ...dbConfig,

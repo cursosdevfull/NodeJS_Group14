@@ -1,8 +1,11 @@
+import dotenv from "dotenv";
 import { DataSource } from "typeorm";
 
 import app from "./app";
 import { DatabaseRelation } from "./app/bootstrap/database-relation";
 import { ServerBootstrap } from "./app/bootstrap/server";
+
+dotenv.config();
 
 (async () => {
   const serverBootstrap = new ServerBootstrap(app);

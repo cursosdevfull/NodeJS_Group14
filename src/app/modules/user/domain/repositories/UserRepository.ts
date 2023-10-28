@@ -14,4 +14,5 @@ export interface UserRepository {
   ): Promise<Result<PageResult<User>, Error>>;
   update(user: User): Promise<Result<User, Error>>;
   delete(id: string): Promise<Result<boolean, Error>>;
+  getAllByRole(roleId: string): Promise<Result<User[], Error>>;
 }

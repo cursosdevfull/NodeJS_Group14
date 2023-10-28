@@ -1,17 +1,26 @@
-import { PageResult } from "@/app/core/domain/page-result.interface";
-import { IError } from "@/app/core/error/error.interface";
 import { err, ok, Result } from "neverthrow";
+import { IsNull } from "typeorm";
 
+import { DatabaseRelation } from "../../../bootstrap/database-relation";
+import { PageResult } from "../../../core/domain/page-result.interface";
+import { IError } from "../../../core/error/error.interface";
 import { UserRepository } from "../domain/repositories/UserRepository";
 import { User } from "../domain/roots/User";
-import { UserMemory } from "./UserMemory";
+import { UserDto } from "./dtos/User.dto";
+import { UserEntity } from "./entities/user.entity";
 
+//import { UserMemory } from "./UserMemory";
 export class UserInfrastructure implements UserRepository {
   constructor() {}
 
-  save(user: User): Promise<Result<User, Error>> {
+  async save(user: User): Promise<Result<User, Error>> {
     try {
-      UserMemory.add(user);
+      const userEntity: UserEntity = UserDto.fromDomainToData(user);
+
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+      await repository.save(userEntity);
+
       return Promise.resolve(ok(user));
     } catch (error) {
       const objErr: IError = new Error(error.message);
@@ -21,12 +30,18 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  getOne(id: string): Promise<Result<User, Error>> {
+  async getOne(id: string): Promise<Result<User, Error>> {
     try {
-      const userFound = UserMemory.findById(id);
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const userFound = await repository.findOne({
+        where: { id, deletedAt: IsNull() },
+        relations: ["roles"],
+      });
 
       if (userFound) {
-        return Promise.resolve(ok(userFound));
+        return Promise.resolve(ok(UserDto.fromDataToDomain(userFound)));
       } else {
         const objErr: IError = new Error("User not found");
         objErr.status = 404;
@@ -40,9 +55,12 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  existsUserWithEmail(email: string): Promise<Result<boolean, Error>> {
+  async existsUserWithEmail(email: string): Promise<Result<boolean, Error>> {
     try {
-      const userFound = UserMemory.findByEmail(email);
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const userFound = await repository.findOne({ where: { email } });
       if (userFound) {
         return Promise.resolve(ok(true));
       } else {
@@ -56,9 +74,19 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  getAll(): Promise<Result<User[], Error>> {
+  async getAll(): Promise<Result<User[], Error>> {
     try {
-      return Promise.resolve(ok(UserMemory.getAll()));
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const usersFound = await repository.find({
+        where: { deletedAt: IsNull() },
+        relations: ["roles"],
+      });
+
+      return Promise.resolve(
+        ok(usersFound.map((userFound) => UserDto.fromDataToDomain(userFound)))
+      );
     } catch (error) {
       const objErr: IError = new Error(error.message);
       objErr.status = 500;
@@ -67,20 +95,31 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  getByPage(
+  async getByPage(
     page: number,
     pageSize: number
   ): Promise<Result<PageResult<User>, Error>> {
     try {
-      const [data, totalRecords, totalPages] = UserMemory.getPage(
-        page,
-        pageSize
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+      const [data, totalRecords] = await repository.findAndCount({
+        skip: page * pageSize,
+        take: pageSize,
+        where: { deletedAt: IsNull() },
+        relations: ["roles"],
+      });
+
+      const totalPages = Math.ceil(totalRecords / pageSize);
+
+      const users = data.map((userFound) =>
+        UserDto.fromDataToDomain(userFound)
       );
+
       const pageResult: PageResult<User> = {
         page,
         totalRecords,
         totalPages,
-        data,
+        data: users,
       };
       return Promise.resolve(ok(pageResult));
     } catch (error) {
@@ -91,10 +130,14 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  update(user: User): Promise<Result<User, Error>> {
-    console.log(user);
+  async update(user: User): Promise<Result<User, Error>> {
     try {
-      UserMemory.update(user);
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const userEntity: UserEntity = UserDto.fromDomainToData(user);
+      await repository.save(userEntity);
+
       return Promise.resolve(ok(user));
     } catch (error) {
       const objErr: IError = new Error(error.message);
@@ -104,16 +147,49 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  delete(id: string): Promise<Result<boolean, Error>> {
+  async delete(id: string): Promise<Result<boolean, Error>> {
     try {
-      const position = UserMemory.findIndex(id);
-      if (position === -1) {
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const userFound = await repository.findOne({
+        where: { id, deletedAt: IsNull() },
+      });
+
+      if (!userFound) {
         const objErr: IError = new Error("User not found");
         objErr.status = 404;
         return Promise.resolve(err(objErr));
       }
-      UserMemory.delete(position);
+
+      const user = UserDto.fromDataToDomain(userFound);
+      user.delete();
+
+      const userDeleted = UserDto.fromDomainToData(user);
+      await repository.save(userDeleted);
+
       return Promise.resolve(ok(true));
+    } catch (error) {
+      const objErr: IError = new Error(error.message);
+      objErr.status = 500;
+
+      return Promise.resolve(err(objErr));
+    }
+  }
+
+  async getAllByRole(roleId: string): Promise<Result<User[], Error>> {
+    try {
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const usersFound = await repository.find({
+        where: { deletedAt: IsNull(), roles: { id: roleId } },
+        relations: ["roles"],
+      });
+
+      return Promise.resolve(
+        ok(usersFound.map((userFound) => UserDto.fromDataToDomain(userFound)))
+      );
     } catch (error) {
       const objErr: IError = new Error(error.message);
       objErr.status = 500;

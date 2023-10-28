@@ -1,36 +1,37 @@
 ### list users
-GET  http://localhost:3000/user HTTP/1.1
+GET  http://localhost:4000/user HTTP/1.1
 
 ### create user
-POST  http://localhost:3000/user HTTP/1.1
+POST  http://localhost:4000/user HTTP/1.1
 content-type: application/json
 
 {
     "name":"sergio", 
     "lastname": "hidalgo",
-    "email":"correo2@correo.com",
+    "email":"correo@correo.com",
     "password": "12345", 
-    "age": 30, 
     "number": 825, 
-    "city": "Lima", 
     "country": "Perú", 
-    "gender": "Hombre"
+    "street": "Los Frutales",
+    "roles": ["522d4f4c-7762-488f-8879-0431bbf6b449"]
 }
 
 ### get user
-GET http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1
+GET http://localhost:4000/user/c1b2328c-fa69-4576-a5e6-5c77022097df HTTP/1.1
 
 ### update user
-PUT http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1
+PUT http://localhost:4000/user/c1b2328c-fa69-4576-a5e6-5c77022097df HTTP/1.1
 content-type: application/json
 
 {
-    "name": "sergio iván",
-    "lastname": "hidalgo cáceres"
+    "roles": ["522d4f4c-7762-488f-8879-0431bbf6b449", "793f2bb0-4449-4d46-b70b-c576b6f8e1f8"]
 }
 
 ### users by page
-GET http://localhost:3000/user/page/1/pageSize/20 HTTP/1.1
+GET http://localhost:4000/user/page/0/pageSize/20 HTTP/1.1
 
 ### delete user
-DELETE http://localhost:3000/user/ef208023-049f-43a9-b497-719ac608878a HTTP/1.1
+DELETE http://localhost:4000/user/ac5e5ee0-c721-40ed-b4ff-1a59865818f1 HTTP/1.1
+
+### users by role
+GET http://localhost:4000/user/role/522d4f4c-7762-488f-8879-0431bbf6b449 HTTP/1.1
