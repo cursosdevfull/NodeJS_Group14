@@ -28,7 +28,7 @@ export interface UserOptionals {
   image: string | null;
 }
 
-export type UserUpdate = Partial<
+export type UserToUpdate = Partial<
   Pick<UserEssentials, "name" | "lastname" | "password"> & UserOptionals
 >;
 
@@ -79,7 +79,7 @@ export class User {
     };
   }
 
-  update(userToUpdate: UserUpdate) {
+  update(userToUpdate: UserToUpdate) {
     if (userToUpdate.name) NameVO.create(userToUpdate.name);
     if (userToUpdate.lastname) LastnameVO.create(userToUpdate.lastname);
 

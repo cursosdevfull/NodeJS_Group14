@@ -1,19 +1,18 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import {
-  UploadBuilder,
-  UploadLocal,
-} from "../../../core/middlewares/upload.middleware";
-import { UserCreate } from "../application/UserCreate";
-import { UserDelete } from "../application/UserDelete";
-import { UserGetAll } from "../application/UserGetAll";
-import { UserGetAllByRole } from "../application/UserGetAllByRole";
-import { UserGetByPage } from "../application/UserGetByPage";
-import { UserGetOne } from "../application/UserGetOne";
-import { UserUpdate } from "../application/UserUpdate";
-import { UserRepository } from "../domain/repositories/UserRepository";
-import { UserInfrastructure } from "../infrastructure/UserInfrastructure";
-import { UserController } from "./user.controller";
+import { CacheMiddleware } from '../../../core/middlewares/cache.middleware';
+import { UploadBuilder, UploadLocal } from '../../../core/middlewares/upload.middleware';
+import { UserCreate } from '../application/UserCreate';
+import { UserDelete } from '../application/UserDelete';
+import { UserGetAll } from '../application/UserGetAll';
+import { UserGetAllByRole } from '../application/UserGetAllByRole';
+import { UserGetByPage } from '../application/UserGetByPage';
+import { UserGetImage } from '../application/UserGetImage';
+import { UserGetOne } from '../application/UserGetOne';
+import { UserUpdate } from '../application/UserUpdate';
+import { UserRepository } from '../domain/repositories/UserRepository';
+import { UserInfrastructure } from '../infrastructure/UserInfrastructure';
+import { UserController } from './user.controller';
 
 class UserRoutes {
   readonly router: Router;
@@ -24,8 +23,20 @@ class UserRoutes {
   }
 
   mountRoutes() {
-    this.router.get("/", this.controller.list.bind(this.controller));
-    this.router.get("/:id", this.controller.getOne.bind(this.controller));
+    this.router.get(
+      "/",
+      CacheMiddleware.build("users_list"),
+      this.controller.list.bind(this.controller)
+    );
+    this.router.get(
+      "/:id",
+      CacheMiddleware.build("users_get_one"),
+      this.controller.getOne.bind(this.controller)
+    );
+    this.router.get(
+      "/image/:id",
+      this.controller.getImage.bind(this.controller)
+    );
     this.router.post(
       "/",
       new UploadLocal().save(
@@ -35,6 +46,7 @@ class UserRoutes {
           .addDestination("public")
           .addIsPublic(true)
           .addMaxSize(5000000)
+          .addNameOfBucket("bucket-curso-nodejs")
           .build()
       ),
       this.controller.insert.bind(this.controller)
@@ -61,6 +73,7 @@ const userUpdate = new UserUpdate(userRepository);
 const userGetByPage = new UserGetByPage(userRepository);
 const userDelete = new UserDelete(userRepository);
 const userGetAllByRole = new UserGetAllByRole(userRepository);
+const userGetImage = new UserGetImage(userRepository);
 const userController = new UserController(
   userCreate,
   userGetOne,
@@ -68,7 +81,8 @@ const userController = new UserController(
   userGetAllByRole,
   userUpdate,
   userGetByPage,
-  userDelete
+  userDelete,
+  userGetImage
 );
 
 export default new UserRoutes(userController).router;

@@ -1,7 +1,7 @@
-import { PageResult } from "@/app/core/domain/page-result.interface";
-import { Result } from "neverthrow";
+import { PageResult } from '@/app/core/domain/page-result.interface';
+import { Result } from 'neverthrow';
 
-import { User } from "../roots/User";
+import { User } from '../roots/User';
 
 export interface UserRepository {
   save(user: User): Promise<Result<User, Error>>;
@@ -12,7 +12,6 @@ export interface UserRepository {
     page: number,
     pageSize: number
   ): Promise<Result<PageResult<User>, Error>>;
-  update(user: User): Promise<Result<User, Error>>;
-  delete(id: string): Promise<Result<boolean, Error>>;
   getAllByRole(roleId: string): Promise<Result<User[], Error>>;
+  getImage(id: string): Promise<Result<string, Error>>;
 }

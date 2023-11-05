@@ -1,8 +1,8 @@
-import { err, ok, Result } from "neverthrow";
+import { err, ok, Result } from 'neverthrow';
 
-import { UserRepository } from "../domain/repositories/UserRepository";
-import { User } from "../domain/roots/User";
-import { ExceptionApplicationMessage } from "./exceptions/exception";
+import { UserRepository } from '../domain/repositories/UserRepository';
+import { User } from '../domain/roots/User';
+import { ExceptionApplicationMessage } from './exceptions/exception';
 
 //const pdfMake = require("pdfmake/build/pdfmake");
 
@@ -29,6 +29,9 @@ export class UserCreate {
     }
 
     const userInserted = userInsertedResult.value;
+    user.update({
+      image: `http://localhost:4000/photos/${userInserted.properties().image}`,
+    });
     return Promise.resolve(ok(userInserted));
   }
 }

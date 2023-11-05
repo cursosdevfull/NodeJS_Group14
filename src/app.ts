@@ -1,9 +1,10 @@
-import express, { Application } from "express";
-import multer from "multer";
-import path from "path";
+import express, { Application } from 'express';
+import multer from 'multer';
+import path from 'path';
 
-import roleRouter from "./app/modules/role/presentation/role.routes";
-import userRouter from "./app/modules/user/presentation/user.routes";
+import { RedisBootstrap } from './app/bootstrap/redis';
+import roleRouter from './app/modules/role/presentation/role.routes';
+import userRouter from './app/modules/user/presentation/user.routes';
 
 class App {
   application: Application;
@@ -12,11 +13,19 @@ class App {
     this.application = express();
     this.init();
     this.middlewares();
+    this.mountHelpers();
     this.mountRoutes();
   }
 
   init() {
     multer();
+  }
+
+  mountHelpers() {
+    this.application.get("/invalidate-cache", (req, res) => {
+      RedisBootstrap.clear();
+      res.send("Cache cleared");
+    });
   }
 
   middlewares() {
@@ -28,7 +37,7 @@ class App {
     const currentPath = __dirname;
     const viewsPath = path.join(currentPath, "../public");
 
-    this.application.use(express.static(viewsPath));
+    //this.application.use(express.static(viewsPath));
   }
 
   mountRoutes() {

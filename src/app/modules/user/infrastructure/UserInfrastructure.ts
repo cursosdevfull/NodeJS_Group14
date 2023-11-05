@@ -1,13 +1,17 @@
-import { err, ok, Result } from "neverthrow";
-import { IsNull } from "typeorm";
+import * as AWS from 'aws-sdk';
+import mimetypes from 'mime-types';
+import { err, ok, Result } from 'neverthrow';
+import { IsNull } from 'typeorm';
 
-import { DatabaseRelation } from "../../../bootstrap/database-relation";
-import { PageResult } from "../../../core/domain/page-result.interface";
-import { IError } from "../../../core/error/error.interface";
-import { UserRepository } from "../domain/repositories/UserRepository";
-import { User } from "../domain/roots/User";
-import { UserDto } from "./dtos/User.dto";
-import { UserEntity } from "./entities/user.entity";
+import { DatabaseRelation } from '../../../bootstrap/database-relation';
+import { PageResult } from '../../../core/domain/page-result.interface';
+import { IError } from '../../../core/error/error.interface';
+import { UserRepository } from '../domain/repositories/UserRepository';
+import { User } from '../domain/roots/User';
+import { UserDto } from './dtos/User.dto';
+import { UserEntity } from './entities/user.entity';
+
+const S3Client = new AWS.S3();
 
 //import { UserMemory } from "./UserMemory";
 export class UserInfrastructure implements UserRepository {
@@ -19,9 +23,9 @@ export class UserInfrastructure implements UserRepository {
 
       const repository =
         DatabaseRelation.dataSource.manager.getRepository(UserEntity);
-      await repository.save(userEntity);
+      const userInserted = await repository.save(userEntity);
 
-      return Promise.resolve(ok(user));
+      return Promise.resolve(ok(UserDto.fromDataToDomain(userInserted)));
     } catch (error) {
       const objErr: IError = new Error(error.message);
       objErr.status = 500;
@@ -130,53 +134,6 @@ export class UserInfrastructure implements UserRepository {
     }
   }
 
-  async update(user: User): Promise<Result<User, Error>> {
-    try {
-      const repository =
-        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
-
-      const userEntity: UserEntity = UserDto.fromDomainToData(user);
-      await repository.save(userEntity);
-
-      return Promise.resolve(ok(user));
-    } catch (error) {
-      const objErr: IError = new Error(error.message);
-      objErr.status = 500;
-
-      return Promise.resolve(err(objErr));
-    }
-  }
-
-  async delete(id: string): Promise<Result<boolean, Error>> {
-    try {
-      const repository =
-        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
-
-      const userFound = await repository.findOne({
-        where: { id, deletedAt: IsNull() },
-      });
-
-      if (!userFound) {
-        const objErr: IError = new Error("User not found");
-        objErr.status = 404;
-        return Promise.resolve(err(objErr));
-      }
-
-      const user = UserDto.fromDataToDomain(userFound);
-      user.delete();
-
-      const userDeleted = UserDto.fromDomainToData(user);
-      await repository.save(userDeleted);
-
-      return Promise.resolve(ok(true));
-    } catch (error) {
-      const objErr: IError = new Error(error.message);
-      objErr.status = 500;
-
-      return Promise.resolve(err(objErr));
-    }
-  }
-
   async getAllByRole(roleId: string): Promise<Result<User[], Error>> {
     try {
       const repository =
@@ -190,6 +147,65 @@ export class UserInfrastructure implements UserRepository {
       return Promise.resolve(
         ok(usersFound.map((userFound) => UserDto.fromDataToDomain(userFound)))
       );
+    } catch (error) {
+      const objErr: IError = new Error(error.message);
+      objErr.status = 500;
+
+      return Promise.resolve(err(objErr));
+    }
+  }
+
+  async getImage(id: string): Promise<Result<string, Error>> {
+    try {
+      const repository =
+        DatabaseRelation.dataSource.manager.getRepository(UserEntity);
+
+      const userFound = await repository.findOne({
+        where: { id, deletedAt: IsNull() },
+        relations: ["roles"],
+      });
+
+      if (userFound) {
+        const image = userFound.image;
+
+        const fileContent = await S3Client.getObject({
+          Bucket: "bucket-curso-nodejs",
+          Key: image,
+        }).promise();
+
+        const pathImage = `https://bucket-curso-nodejs.s3.amazonaws.com/${image}`;
+
+        const urlSigned = await S3Client.getSignedUrlPromise("getObject", {
+          Bucket: "bucket-curso-nodejs",
+          Key: image,
+          Expires: 15,
+        });
+
+        console.log("urlSigned", urlSigned);
+
+        //const imageFile = fs.readFileSync(pathImage);
+        const mime = mimetypes.lookup(pathImage);
+        //const base64Image = Buffer.from(fileContent).toString("base64");
+        const base64Image = (fileContent.Body as unknown as Buffer).toString(
+          "base64"
+        );
+
+        return Promise.resolve(ok(`data:${mime};base64,${base64Image}`));
+
+        /*const pathImage = path.join(
+          __dirname,
+          `../../../../../public/photos/${image}`
+        );
+        const imageFile = fs.readFileSync(pathImage);
+        const mime = mimetypes.lookup(pathImage);
+        const base64Image = Buffer.from(imageFile).toString("base64");
+
+        return Promise.resolve(ok(`data:${mime};base64,${base64Image}`));*/
+      } else {
+        const objErr: IError = new Error("User not found");
+        objErr.status = 404;
+        return Promise.resolve(err(objErr));
+      }
     } catch (error) {
       const objErr: IError = new Error(error.message);
       objErr.status = 500;

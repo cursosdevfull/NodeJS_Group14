@@ -1,4 +1,4 @@
-import path from "path";
+import path from 'path';
 
 export class Parameter {
   static get portApp() {
@@ -48,5 +48,25 @@ export class Parameter {
 
   static get maxQueryExecutionTime() {
     return Number(process.env.DB_MAX_QUERY_EXECUTION_TIME) || 10000;
+  }
+
+  static get redisHost() {
+    return process.env.REDIS_HOST || "localhost";
+  }
+
+  static get redisPort() {
+    return Number(process.env.REDIS_PORT) || 6379;
+  }
+
+  static get redisPassword() {
+    return process.env.REDIS_PASSWORD || "todovale";
+  }
+
+  static get redisMaxRetriesPerRequest() {
+    return Number(process.env.REDIS_MAX_RETRIES_PER_REQUEST) || 3;
+  }
+
+  static get redisExpireCache() {
+    return Number(process.env.REDIS_EXPIRE_CACHE) || 24 * 60 * 60 * 1000;
   }
 }

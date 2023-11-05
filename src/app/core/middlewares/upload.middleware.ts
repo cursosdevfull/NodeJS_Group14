@@ -1,5 +1,7 @@
-import { RequestHandler } from "express";
-import multer from "multer";
+import { S3Client } from '@aws-sdk/client-s3';
+import { Request, RequestHandler } from 'express';
+import multer from 'multer';
+import multer_s3 from 'multer-s3';
 
 export class UploadBuilder {
   private _fieldname: string;
@@ -7,6 +9,7 @@ export class UploadBuilder {
   private _allowedExtensions: string[];
   private _destination: string;
   private _isPublic: boolean;
+  private _nameOfBucket: string;
 
   addFieldname(value: string): UploadBuilder {
     this._fieldname = value;
@@ -33,6 +36,11 @@ export class UploadBuilder {
     return this;
   }
 
+  addNameOfBucket(value: string): UploadBuilder {
+    this._nameOfBucket = value;
+    return this;
+  }
+
   get fieldname(): string {
     return this._fieldname;
   }
@@ -53,6 +61,10 @@ export class UploadBuilder {
     return this._isPublic;
   }
 
+  get nameOfBucket(): string {
+    return this._nameOfBucket;
+  }
+
   build(): UploadOptions {
     return new UploadOptions(this);
   }
@@ -64,6 +76,7 @@ export class UploadOptions {
   readonly allowedExtensions: string[];
   readonly destination: string;
   readonly isPublic: boolean;
+  readonly nameOfBucket: string;
 
   constructor(instance: UploadBuilder) {
     this.fieldname = instance.fieldname;
@@ -71,16 +84,9 @@ export class UploadOptions {
     this.allowedExtensions = instance.allowedExtensions;
     this.destination = instance.destination;
     this.isPublic = instance.isPublic;
+    this.nameOfBucket = instance.nameOfBucket;
   }
 }
-
-/*const options: UploadOptions = new UploadBuilder()
-    .addFieldname("file")
-    .addAllowedExtensions(["png", "jpg", "jpeg"])
-    .addDestination("public")
-    .addIsPublic(true)
-    .addMaxSize(5000000)
-    .build();*/
 
 export interface IUpload {
   save(options: UploadOptions): RequestHandler;
@@ -89,8 +95,47 @@ export interface IUpload {
 export class UploadLocal implements IUpload {
   save(options: UploadOptions): RequestHandler {
     return multer({
-      dest: "./public/photos/",
-      limits: { fileSize: options.maxSize },
+      storage: multer_s3({
+        s3: new S3Client({}),
+        bucket: options.nameOfBucket,
+        acl: options.isPublic ? "public-read" : "private",
+        metadata(req, file, cb) {
+          cb(null, { fieldName: file.fieldname });
+        },
+        key(req: Request, file, cb) {
+          const allowedMimes = options.allowedExtensions;
+          if (!allowedMimes.includes(file.mimetype)) {
+            return cb(new Error("Invalid file type."));
+          }
+
+          const partsFileName = file.originalname.split(".");
+          const extension = partsFileName[partsFileName.length - 1];
+          const name = Date.now();
+
+          const newFileName = `${name}.${extension}`;
+
+          req.body[options.fieldname] = newFileName;
+          cb(null, newFileName);
+        },
+      }),
+      //dest: "./public/photos/",
+      /*storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+          cb(null, "./public/photos/");
+        },
+        filename: function (req, file, cb) {
+          const partsFileName = file.originalname.split(".");
+          const extension = partsFileName[partsFileName.length - 1];
+          const name = Date.now();
+
+          const newFileName = `${name}.${extension}`;
+
+          req.body[options.fieldname] = newFileName;
+
+          cb(null, newFileName);
+        },
+      }),*/
+      /*limits: { fileSize: options.maxSize },
       fileFilter: (req, file, cb) => {
         const allowedMimes = options.allowedExtensions;
         if (allowedMimes.includes(file.mimetype)) {
@@ -98,7 +143,7 @@ export class UploadLocal implements IUpload {
         } else {
           cb(new Error("Invalid file type."));
         }
-      },
+      },*/
     }).single(options.fieldname);
   }
 }

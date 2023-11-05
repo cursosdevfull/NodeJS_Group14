@@ -1,18 +1,21 @@
-import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
+import { Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
-import { EncryptService } from "../application/services/Encrypt.service";
-import { UserCreate } from "../application/UserCreate";
-import { UserDelete } from "../application/UserDelete";
-import { UserGetAll } from "../application/UserGetAll";
-import { UserGetAllByRole } from "../application/UserGetAllByRole";
-import { UserGetByPage } from "../application/UserGetByPage";
-import { UserGetOne } from "../application/UserGetOne";
-import { UserUpdate } from "../application/UserUpdate";
-import { Address } from "../domain/entities/Address";
-import { User } from "../domain/roots/User";
-import { NameVO } from "../domain/value-objects/name.vo";
-import { UserDto } from "./dtos/user.dto";
+import { RedisBootstrap } from '../../../bootstrap/redis';
+import { EncryptService } from '../application/services/Encrypt.service';
+import { UserCreate } from '../application/UserCreate';
+import { UserDelete } from '../application/UserDelete';
+import { UserGetAll } from '../application/UserGetAll';
+import { UserGetAllByRole } from '../application/UserGetAllByRole';
+import { UserGetByPage } from '../application/UserGetByPage';
+import { UserGetImage } from '../application/UserGetImage';
+import { UserGetOne } from '../application/UserGetOne';
+import { UserUpdate } from '../application/UserUpdate';
+import { Address } from '../domain/entities/Address';
+import { Role } from '../domain/entities/Role';
+import { User, UserToUpdate } from '../domain/roots/User';
+import { NameVO } from '../domain/value-objects/name.vo';
+import { UserDto } from './dtos/user.dto';
 
 export class UserController {
   constructor(
@@ -22,7 +25,8 @@ export class UserController {
     private readonly userGetAllByRole: UserGetAllByRole,
     private readonly userUpdate: UserUpdate,
     private readonly userGetByPage: UserGetByPage,
-    private readonly userDelete: UserDelete
+    private readonly userDelete: UserDelete,
+    private readonly userGetImage: UserGetImage
   ) {}
 
   async list(req: Request, res: Response) {
@@ -33,6 +37,11 @@ export class UserController {
         stack: usersResult.error.stack,
       });
     }
+
+    RedisBootstrap.redisClient.set(
+      res.locals.cacheKey,
+      JSON.stringify(usersResult.value)
+    );
     res.json(usersResult.value);
   }
 
@@ -61,6 +70,7 @@ export class UserController {
       city,
       gender,
       roles,
+      image,
     } = req.body;
 
     const nameResult = NameVO.create(name);
@@ -86,7 +96,8 @@ export class UserController {
       age: age ? parseInt(age) : null,
       gender,
       address,
-      roles,
+      roles: roles ? roles.map((role: string) => new Role(role)) : [],
+      image,
     });
 
     const userInserted = await this.userCreate.execute(user);
@@ -96,6 +107,8 @@ export class UserController {
         stack: userInserted.error.stack,
       });
     }
+
+    RedisBootstrap.clear("users");
 
     res.json(userInserted.value);
   }
@@ -109,7 +122,14 @@ export class UserController {
       });
     }
 
-    res.json(UserDto.fromDomainToResponse(userResult.value));
+    const response = UserDto.fromDomainToResponse(userResult.value);
+
+    RedisBootstrap.redisClient.set(
+      res.locals.cacheKey,
+      JSON.stringify(response)
+    );
+
+    res.json(response);
   }
 
   async getUsersByPage(req: Request, res: Response) {
@@ -128,19 +148,10 @@ export class UserController {
   }
 
   async update(req: Request, res: Response) {
-    const userResult = await this.userGetOne.getOne(req.params.id);
+    const { id } = req.params;
+    const userToUpdate: UserToUpdate = req.body;
 
-    if (userResult.isErr()) {
-      return res.status(500).json({
-        message: userResult.error.message,
-        stack: userResult.error.stack,
-      });
-    }
-
-    const user = userResult.value;
-    user.update(req.body);
-
-    const userUpdateResult = await this.userUpdate.execute(user);
+    const userUpdateResult = await this.userUpdate.execute(id, userToUpdate);
     if (userUpdateResult.isErr()) {
       return res.status(500).json({
         message: userUpdateResult.error.message,
@@ -152,19 +163,9 @@ export class UserController {
   }
 
   async delete(req: Request, res: Response) {
-    const userResult = await this.userGetOne.getOne(req.params.id);
+    const { id } = req.params;
 
-    if (userResult.isErr()) {
-      return res.status(500).json({
-        message: userResult.error.message,
-        stack: userResult.error.stack,
-      });
-    }
-
-    const user = userResult.value;
-    user.delete();
-
-    const userDeleteResult = await this.userDelete.execute(userResult.value);
+    const userDeleteResult = await this.userDelete.execute(id);
     if (userDeleteResult.isErr()) {
       return res.status(500).json({
         message: userDeleteResult.error.message,
@@ -173,5 +174,17 @@ export class UserController {
     }
 
     res.json(UserDto.fromDomainToResponse(userDeleteResult.value));
+  }
+
+  async getImage(req: Request, res: Response) {
+    const imageResult = await this.userGetImage.getImage(req.params.id);
+    if (imageResult.isErr()) {
+      return res.status(500).json({
+        message: imageResult.error.message,
+        stack: imageResult.error.stack,
+      });
+    }
+
+    res.send(imageResult.value);
   }
 }

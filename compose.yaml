@@ -40,6 +40,44 @@ services:
       retries: 3
       start_interval: 5s
 
+  redis-server:
+    image: redis:6.0.5-alpine
+    container_name: redis-server
+    command: redis-server --requirepass todovale
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - net-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_interval: 5s
+
+  redis-client:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-client
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: redis-server
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: todovale
+    ports:
+      - "8081:8081"
+    networks:
+      - net-redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_interval: 5s
+    depends_on:
+      redis-server:
+        condition: service_healthy
+
 volumes:
   mysql-data:
     name: mysql-data
@@ -47,4 +85,7 @@ volumes:
 networks:
   net-mysql:
     name: net-mysql
+    driver: bridge
+  net-redis:
+    name: net-redis
     driver: bridge

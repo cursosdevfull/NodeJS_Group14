@@ -1,22 +1,31 @@
 import { err, ok, Result } from "neverthrow";
 
 import { UserRepository } from "../domain/repositories/UserRepository";
-import { User } from "../domain/roots/User";
+import { User, UserToUpdate } from "../domain/roots/User";
 
 //const pdfMake = require("pdfmake/build/pdfmake");
 
 export class UserUpdate {
   constructor(private readonly repository: UserRepository) {}
 
-  async execute(user: User): Promise<Result<User, Error>> {
-    const userResult = await this.repository.getOne(user.properties().id);
-
-    if (userResult.isErr()) {
-      return err(new Error(userResult.error.message));
+  async execute(
+    id: string,
+    userToUpdate: UserToUpdate
+  ): Promise<Result<User, Error>> {
+    const userFoundResult = await this.repository.getOne(id);
+    if (userFoundResult.isErr()) {
+      return err(new Error(userFoundResult.error.message));
     }
 
-    await this.repository.update(user);
+    const userFound = userFoundResult.value;
+    userFound.update(userToUpdate);
 
-    return Promise.resolve(ok(user));
+    const userUpdateResult = await this.repository.save(userFound);
+    if (userUpdateResult.isErr()) {
+      return err(new Error(userUpdateResult.error.message));
+    }
+
+    const userUpdated = userUpdateResult.value;
+    return Promise.resolve(ok(userUpdated));
   }
 }
