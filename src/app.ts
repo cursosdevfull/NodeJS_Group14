@@ -14,6 +14,7 @@ class App {
   constructor() {
     this.application = express();
     this.init();
+    this.mountHealthCheck();
     this.middlewares();
     this.mountHelpers();
     this.mountRoutes();
@@ -22,6 +23,24 @@ class App {
 
   init() {
     multer();
+  }
+
+  mountHealthCheck() {
+    this.application.get("/", (req, res) => {
+      res.send("OK");
+    });
+
+    this.application.get("/health", (req, res) => {
+      res.send("OK");
+    });
+
+    this.application.get("/healthz", (req, res) => {
+      res.send("OK");
+    });
+
+    this.application.get("/healthcheck", (req, res) => {
+      res.send("OK");
+    });
   }
 
   mountHelpers() {
