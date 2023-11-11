@@ -6,7 +6,7 @@ import { DatabaseRelation } from './app/bootstrap/database-relation';
 import { RedisBootstrap } from './app/bootstrap/redis';
 import { ServerBootstrap } from './app/bootstrap/server';
 
-dotenv.config();
+dotenv.config({ path: "variables.env" });
 
 (async () => {
   const serverBootstrap = new ServerBootstrap(app);
