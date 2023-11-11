@@ -3,7 +3,9 @@
   "Image": {
     "Name": "282865065290.dkr.ecr.us-east-1.amazonaws.com/curso14:latest"
   },
-  "Ports": {
-    "ContainerPort": "80"
-  }
+  "Ports": [
+    {
+      "ContainerPort": "80"
+    }
+  ]
 }
