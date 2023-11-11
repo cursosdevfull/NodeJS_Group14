@@ -1,6 +1,6 @@
-ARG NODE_VERSION=18.16.1
+ARG NODE_VERSION=alpine3.16
 
-FROM node:${NODE_VERSION}-alpine as stage_base
+FROM node:${NODE_VERSION} as stage_base
 WORKDIR /app
 
 FROM stage_base as stage_deps
