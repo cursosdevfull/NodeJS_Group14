@@ -1,7 +1,7 @@
+import { EmailVO } from "../../../../core/domain/value-objects/email.vo";
 import { Address } from "../entities/Address";
 import { Role } from "../entities/Role";
 import { AgeVO } from "../value-objects/age.vo";
-import { EmailVO } from "../value-objects/email.vo";
 import { IdVO } from "../value-objects/id.vo";
 import { LastnameVO } from "../value-objects/lastname.vo";
 import { NameVO } from "../value-objects/name.vo";
@@ -23,6 +23,7 @@ export interface UserOptionals {
   address: Address | null;
   gender: GENDER | null;
   createdAt: Date;
+  refreshToken: string;
   updatedAt: Date | null;
   deletedAt: Date | null;
   image: string | null;
@@ -48,6 +49,7 @@ export class User {
   private readonly createdAt: Date;
   private updatedAt: Date | null;
   private deletedAt: Date | null;
+  private refreshToken: string;
 
   constructor(props: UserProperties) {
     IdVO.create(props.id);
@@ -76,6 +78,7 @@ export class User {
       deletedAt: this.deletedAt,
       roles: this.roles,
       image: this.image,
+      refreshToken: this.refreshToken,
     };
   }
 

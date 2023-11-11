@@ -18,6 +18,7 @@ export class UserDto {
     userEntity.updatedAt = user.properties().updatedAt!;
     userEntity.deletedAt = user.properties().deletedAt!;
     userEntity.image = user.properties().image;
+    userEntity.refreshToken = user.properties().refreshToken;
     userEntity.roles = user.properties().roles.map((role: Role) => {
       const roleEntity = new RoleEntity();
       roleEntity.id = role.id;
@@ -44,6 +45,7 @@ export class UserDto {
       deletedAt: userEntity.deletedAt,
       roles: userEntity.roles.map((role) => new Role(role.id, role.name)),
       image: userEntity.image,
+      refreshToken: userEntity.refreshToken,
     };
     return new User(properties);
   }

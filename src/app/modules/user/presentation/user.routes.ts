@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { AuthenticationGuard } from '../../../core/middlewares/authentication.guard';
+import { AuthorizationGuard } from '../../../core/middlewares/authorization.guard';
 import { CacheMiddleware } from '../../../core/middlewares/cache.middleware';
 import { UploadBuilder, UploadLocal } from '../../../core/middlewares/upload.middleware';
 import { UserCreate } from '../application/UserCreate';
@@ -25,6 +27,8 @@ class UserRoutes {
   mountRoutes() {
     this.router.get(
       "/",
+      AuthenticationGuard.canActivate,
+      AuthorizationGuard.canActive("ADMIN", "OPERATOR", "MEDIC"),
       CacheMiddleware.build("users_list"),
       this.controller.list.bind(this.controller)
     );
@@ -39,6 +43,8 @@ class UserRoutes {
     );
     this.router.post(
       "/",
+      AuthenticationGuard.canActivate,
+      AuthorizationGuard.canActive("ADMIN"),
       new UploadLocal().save(
         new UploadBuilder()
           .addFieldname("image")

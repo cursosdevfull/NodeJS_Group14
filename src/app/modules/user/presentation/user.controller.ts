@@ -1,21 +1,22 @@
-import { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
 
-import { RedisBootstrap } from '../../../bootstrap/redis';
-import { EncryptService } from '../application/services/Encrypt.service';
-import { UserCreate } from '../application/UserCreate';
-import { UserDelete } from '../application/UserDelete';
-import { UserGetAll } from '../application/UserGetAll';
-import { UserGetAllByRole } from '../application/UserGetAllByRole';
-import { UserGetByPage } from '../application/UserGetByPage';
-import { UserGetImage } from '../application/UserGetImage';
-import { UserGetOne } from '../application/UserGetOne';
-import { UserUpdate } from '../application/UserUpdate';
-import { Address } from '../domain/entities/Address';
-import { Role } from '../domain/entities/Role';
-import { User, UserToUpdate } from '../domain/roots/User';
-import { NameVO } from '../domain/value-objects/name.vo';
-import { UserDto } from './dtos/user.dto';
+import { RedisBootstrap } from "../../../bootstrap/redis";
+import { EncryptService } from "../../../core/application/services/Encrypt.service";
+import { TokenService } from "../../../core/application/services/tokens";
+import { UserCreate } from "../application/UserCreate";
+import { UserDelete } from "../application/UserDelete";
+import { UserGetAll } from "../application/UserGetAll";
+import { UserGetAllByRole } from "../application/UserGetAllByRole";
+import { UserGetByPage } from "../application/UserGetByPage";
+import { UserGetImage } from "../application/UserGetImage";
+import { UserGetOne } from "../application/UserGetOne";
+import { UserUpdate } from "../application/UserUpdate";
+import { Address } from "../domain/entities/Address";
+import { Role } from "../domain/entities/Role";
+import { User, UserToUpdate } from "../domain/roots/User";
+import { NameVO } from "../domain/value-objects/name.vo";
+import { UserDto } from "./dtos/user.dto";
 
 export class UserController {
   constructor(
@@ -98,6 +99,7 @@ export class UserController {
       address,
       roles: roles ? roles.map((role: string) => new Role(role)) : [],
       image,
+      refreshToken: TokenService.generateRefreshToken(),
     });
 
     const userInserted = await this.userCreate.execute(user);

@@ -3,6 +3,8 @@ import multer from 'multer';
 import path from 'path';
 
 import { RedisBootstrap } from './app/bootstrap/redis';
+import { HandlerErrors } from './app/core/error/Error';
+import authRouter from './app/modules/auth/presentation/auth.routes';
 import roleRouter from './app/modules/role/presentation/role.routes';
 import userRouter from './app/modules/user/presentation/user.routes';
 
@@ -15,6 +17,7 @@ class App {
     this.middlewares();
     this.mountHelpers();
     this.mountRoutes();
+    this.mountErrorHandlers();
   }
 
   init() {
@@ -43,6 +46,11 @@ class App {
   mountRoutes() {
     this.application.use("/user", userRouter);
     this.application.use("/role", roleRouter);
+    this.application.use("/auth", authRouter);
+  }
+
+  mountErrorHandlers() {
+    this.application.use(HandlerErrors.generic);
   }
 }
 

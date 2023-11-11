@@ -1,9 +1,11 @@
 ### list users
 GET  http://localhost:4000/user HTTP/1.1
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNvcnJlb0Bjb3JyZW8uY29tIiwicm9sZXMiOlsiQURNSU4iXSwiaWF0IjoxNjk5NzE4MDU4MDA2LCJleHAiOjE2OTk3MTgzNTgwMDZ9.5tPc0ooFg4rYG-JNQylxqLuGJ3D81Y3CKHAe11KBvMg
 
 ### create user
 POST  http://localhost:4000/user HTTP/1.1
 content-type: application/json
+
 
 {
     "name":"sergio", 

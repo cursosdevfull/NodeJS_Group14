@@ -1,7 +1,7 @@
-import { PageResult } from '@/app/core/domain/page-result.interface';
-import { Result } from 'neverthrow';
+import { PageResult } from "@/app/core/domain/page-result.interface";
+import { Result } from "neverthrow";
 
-import { User } from '../roots/User';
+import { User } from "../roots/User";
 
 export interface UserRepository {
   save(user: User): Promise<Result<User, Error>>;
@@ -14,4 +14,5 @@ export interface UserRepository {
   ): Promise<Result<PageResult<User>, Error>>;
   getAllByRole(roleId: string): Promise<Result<User[], Error>>;
   getImage(id: string): Promise<Result<string, Error>>;
+  findUserByEmail(email: string): Promise<Result<User, Error>>;
 }

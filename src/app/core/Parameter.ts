@@ -69,4 +69,16 @@ export class Parameter {
   static get redisExpireCache() {
     return Number(process.env.REDIS_EXPIRE_CACHE) || 24 * 60 * 60 * 1000;
   }
+
+  static get tokenExpireTime() {
+    return Number(process.env.TOKEN_EXPIRE_TIME) || 10;
+  }
+
+  static get tokenSecret() {
+    return process.env.TOKEN_SECRET || "secret";
+  }
+
+  static get environment() {
+    return process.env.NODE_ENV || "development";
+  }
 }

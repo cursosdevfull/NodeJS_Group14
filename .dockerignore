@@ -1,5 +1,5 @@
 node_modules
-Learning*
-.env
+public
+requests
 cache
 dist

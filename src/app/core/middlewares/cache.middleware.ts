@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
 
-import { RedisBootstrap } from '../../bootstrap/redis';
+import { RedisBootstrap } from "../../bootstrap/redis";
 
 export class CacheMiddleware {
   private static setParameters(key: string, params: Record<string, any>) {

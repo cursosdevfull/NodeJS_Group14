@@ -1,4 +1,4 @@
-import { BaseVO } from "./base-vo";
+import { BaseVO } from "../../../modules/user/domain/value-objects/base-vo";
 
 export class EmailVO extends BaseVO<string> {
   private constructor(email: string) {
