@@ -18,4 +18,4 @@ COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/package.json .
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "start:prod"]
