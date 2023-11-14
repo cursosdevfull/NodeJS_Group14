@@ -1,6 +1,7 @@
 ARG NODE_VERSION=alpine3.16
 
-FROM node:${NODE_VERSION} as stage_base
+#FROM node:${NODE_VERSION} as stage_base
+FROM 282865065290.dkr.ecr.us-east-1.amazonaws.com/nodejs18:latest as stage_base
 WORKDIR /app
 
 FROM stage_base as stage_deps
