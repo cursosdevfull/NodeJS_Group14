@@ -1,11 +1,17 @@
 {
-  "AWSEBDockerrunVersion": "1",
-  "Image": {
-    "Name": "282865065290.dkr.ecr.us-east-1.amazonaws.com/curso14:latest"
-  },
-  "Ports": [
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
     {
-      "ContainerPort": "80"
+      "name": "cursonode14",
+      "image": "282865065290.dkr.ecr.us-east-1.amazonaws.com/curso14:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ]
     }
   ]
 }
