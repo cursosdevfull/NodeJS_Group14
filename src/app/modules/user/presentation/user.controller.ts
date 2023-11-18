@@ -39,10 +39,7 @@ export class UserController {
       });
     }
 
-    RedisBootstrap.redisClient.set(
-      res.locals.cacheKey,
-      JSON.stringify(usersResult.value)
-    );
+    RedisBootstrap.set(res.locals.cacheKey, JSON.stringify(usersResult.value));
     res.json(usersResult.value);
   }
 
@@ -126,10 +123,7 @@ export class UserController {
 
     const response = UserDto.fromDomainToResponse(userResult.value);
 
-    RedisBootstrap.redisClient.set(
-      res.locals.cacheKey,
-      JSON.stringify(response)
-    );
+    RedisBootstrap.set(res.locals.cacheKey, JSON.stringify(response));
 
     res.json(response);
   }

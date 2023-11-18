@@ -1,0 +1,41 @@
+[
+  {
+    "id": "8c9cbde1-e383-4f78-8ccb-339d61e62d94",
+    "name": "Jorge",
+    "lastname": "Gonzalez",
+    "email": "jorge@email.com",
+    "password": "123456",
+    "roles": [
+      {
+        "id": "1",
+        "name": "ADMIN"
+      }
+    ]
+  },
+  {
+    "id": "8dbbc6c9-017a-4a15-9bad-48191c660da5",
+    "name": "Milagros",
+    "lastname": "Córdova",
+    "email": "milagros@email.com",
+    "password": "123456",
+    "roles": [
+      {
+        "id": "1",
+        "name": "ADMIN"
+      }
+    ]
+  },
+  {
+    "id": "cc231db8-3700-4a5b-ada8-17be54651e1b",
+    "name": "Luisa",
+    "lastname": "Salas",
+    "email": "luisa@email.com",
+    "password": "123456",
+    "roles": [
+      {
+        "id": "1",
+        "name": "ADMIN"
+      }
+    ]
+  }
+]

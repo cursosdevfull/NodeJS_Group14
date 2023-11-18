@@ -1,8 +1,8 @@
-import { err, ok, Result } from 'neverthrow';
+import { err, ok, Result } from "neverthrow";
 
-import { UserRepository } from '../domain/repositories/UserRepository';
-import { User } from '../domain/roots/User';
-import { ExceptionApplicationMessage } from './exceptions/exception';
+import { UserRepository } from "../domain/repositories/UserRepository";
+import { User } from "../domain/roots/User";
+import { ExceptionApplicationMessage } from "./exceptions/exception";
 
 export class UserGetAll {
   constructor(private readonly repository: UserRepository) {}
